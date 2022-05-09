@@ -1,6 +1,6 @@
 {
   "name": "@cetc-cli/utils",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "cetc-cli/utils",
   "author": "DESKTOP-KS8B59U\\Administrator <lizhenjie979@163.com>",
   "homepage": "",
@@ -18,8 +18,5 @@
   },
   "scripts": {
     "test": "echo \"Error: run tests from root\" && exit 1"
-  },
-  "publishConfig": {
-    "access": "public"
   }
 }
