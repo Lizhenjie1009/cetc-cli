@@ -5,6 +5,9 @@
   "author": "DESKTOP-KS8B59U\\Administrator <lizhenjie979@163.com>",
   "homepage": "",
   "license": "ISC",
+  "bin": {
+    "cetc": "bin/index.js"
+  },
   "main": "lib/core.js",
   "directories": {
     "lib": "lib",

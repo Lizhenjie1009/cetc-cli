@@ -5,7 +5,7 @@
   "author": "DESKTOP-KS8B59U\\Administrator <lizhenjie979@163.com>",
   "homepage": "",
   "license": "ISC",
-  "main": "lib/utils.js",
+  "main": "lib/index.js",
   "directories": {
     "lib": "lib",
     "test": "__tests__"
