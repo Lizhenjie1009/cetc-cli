@@ -25,5 +25,10 @@
   },
   "bugs": {
     "url": "https://github.com/Lizhenjie1009/cetc-cli/issues"
+  },
+  "dependencies": {
+    "@cetc-cli/log": "file:../../utils/log",
+    "colors": "^1.4.0",
+    "semver": "^7.3.7"
   }
 }

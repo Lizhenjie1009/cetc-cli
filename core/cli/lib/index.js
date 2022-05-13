@@ -88,7 +88,7 @@ function registerCommand () {
 // 初始化
 function prepare () {
   checkPkgVersion()
-  checkNodeVersion()
+  // checkNodeVersion()
   checkRoot()
   checkUserHome()
   // checkInputArgs()
@@ -172,16 +172,7 @@ function checkRoot () {
   rootCheck()
 }
 
-function checkNodeVersion () {
-  // 1.拿到当前版本号
-  const currentVersion = process.version
-  // 2.对比最低版本号
-  const lowVersion = constant.LOWEST_NODE_VERSION
 
-  if (!semver.gte(currentVersion, lowVersion)) {
-    throw new Error(colors.red(`cetc-cli 需要安装v${lowVersion}及以上版本的Node.js`))
-  }
-} 
 
 function checkPkgVersion () {
   log.notice('version', pkg.version)

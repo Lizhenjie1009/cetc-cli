@@ -1,6 +1,7 @@
 'use strict'; // 执行命令方法, 初始化引包
 
 const path = require('path');
+const cp = require('child_process');
 
 const Package = require('@cetc-cli/package');
 const log = require('@cetc-cli/log');
@@ -61,13 +62,49 @@ async function exec() {
 
   const rootFile = pkg.getRootFilePath()
   if (rootFile) {
-    // 文件路径引入package包，执行package入口文件方法并传参command。在当前进程中调用
-    require(rootFile).call(null, Array.from(arguments));
-    // require(rootFile)(...arguments);
+    try {
+      // or1. 文件路径引入package包，执行package入口文件方法并传参command。在当前进程中调用
+      // require(rootFile).call(null, Array.from(arguments));
+      // require(rootFile)(...arguments);
+      
+      // or2. 在node子进程中调用
+      const args = Array.from(arguments);
+      const cmd = args[args.length - 1];
+      const o = Object.create(null); // 没有原型的空对象
+      Object.keys(cmd).forEach(key => { // command瘦身
+        if (cmd.hasOwnProperty(key) && !key.startsWith('_') && key !== 'parent') { // 原型链不要
+          o[key] = cmd[key]
+        }
+      })
+      args[args.length - 1] = o; // 对象转换瘦身后的
 
-    // 在node子进程中调用
-    
+      const code = `require('${rootFile}').call(null, ${JSON.stringify(args)})`;
+      // 兼容系统
+      const child = spawn('node', ['-e', code], {
+        cwd: process.cwd(),
+        stdio: 'inherit' // 子进程将所有stream返回给父
+      })
+      child.on('error', e => {
+        log.error(e.message)
+        process.exit(1) // 返回错误code
+      })
+      child.on('exit', e => {
+        log.verbose('命令执行成功: ' + e)
+        process.exit(e) // e => 1
+      })
+    } catch (e) {
+      log.error(e.message)
+    }
   }
+}
+
+// 兼容mas 、 win
+function spawn (command, args, options) {
+  const win32 = process.platform === 'win32'
+  const cmd = win32 ? 'cmd' : command
+  const cmdArgs = win32 ? ['/c'].concat(command, args) : args
+
+  return cp.spawn(cmd, cmdArgs, options || {}) // spawn('cmd', ['/c' , '-e', code])
 }
 
 module.exports = exec;

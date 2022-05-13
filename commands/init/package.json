@@ -27,6 +27,7 @@
     "url": "https://github.com/Lizhenjie1009/cetc-cli/issues"
   },
   "dependencies": {
+    "@cetc-cli/log": "file:../../utils/log",
     "@cetc-cli/command": "file:../../models/command"
   }
 }
