@@ -1,0 +1,31 @@
+{
+  "name": "get-npm-info",
+  "version": "1.0.2",
+  "description": "get-npm-info",
+  "author": "DESKTOP-KS8B59U\\Administrator <lizhenjie979@163.com>",
+  "homepage": "https://github.com/Lizhenjie1009/cetc-cli#readme",
+  "license": "ISC",
+  "main": "lib/index.js",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Lizhenjie1009/cetc-cli.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: run tests from root\" && exit 1"
+  },
+  "bugs": {
+    "url": "https://github.com/Lizhenjie1009/cetc-cli/issues"
+  },
+  "dependencies": {
+    "axios": "^0.27.2",
+    "semver": "^7.3.7",
+    "url-join": "4.0.1"
+  }
+}
