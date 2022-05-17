@@ -31,7 +31,7 @@ async function exec() {
   const packageName = SETTINGS[commandName]
   const packageVersion = 'latest'
 
-  if (!targetPath) { // 目标路径不存在 参数 -tp /xxx
+  if (!targetPath) { // 目标路径不存在 no参数 -tp /xxx
     // 生成缓存路径
     targetPath = path.resolve(homePath, CACHE_DIR)
     storePath = path.resolve(targetPath, 'node_modules')
@@ -60,6 +60,8 @@ async function exec() {
     })
   }
 
+
+  // 引入相关包
   const rootFile = pkg.getRootFilePath()
   if (rootFile) {
     try {

@@ -27,7 +27,10 @@
     "url": "https://github.com/Lizhenjie1009/cetc-cli/issues"
   },
   "dependencies": {
+    "@cetc-cli/command": "file:../../models/command",
     "@cetc-cli/log": "file:../../utils/log",
-    "@cetc-cli/command": "file:../../models/command"
+    "fs-extra": "^10.1.0",
+    "inquirer": "^8.2.4",
+    "semver": "^7.3.7"
   }
 }
