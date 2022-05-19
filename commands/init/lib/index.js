@@ -2,7 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const inquirer = require('inquirer'); // 命令行工具
+const inquirer = require('inquirer'); // 命令行交互工具
 const fse = require('fs-extra'); // fs拓展之后的插件， 含promise
 const semver = require('semver'); // 对比版本号
 const userHome = require('user-home'); // 获取用户主目录
