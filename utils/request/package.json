@@ -1,7 +1,7 @@
 {
-  "name": "@cetc-cli/init",
+  "name": "request",
   "version": "1.0.2",
-  "description": "cetc-cli init",
+  "description": "> TODO: description",
   "author": "DESKTOP-KS8B59U\\Administrator <lizhenjie979@163.com>",
   "homepage": "https://github.com/Lizhenjie1009/cetc-cli#readme",
   "license": "ISC",
@@ -13,9 +13,6 @@
   "files": [
     "lib"
   ],
-  "publishConfig": {
-    "access": "public"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Lizhenjie1009/cetc-cli.git"
@@ -27,14 +24,6 @@
     "url": "https://github.com/Lizhenjie1009/cetc-cli/issues"
   },
   "dependencies": {
-    "@cetc-cli/command": "file:../../models/command",
-    "@cetc-cli/log": "file:../../utils/log",
-    "@cetc-cli/package": "file:../../models/package",
-    "@cetc-cli/request": "file:../../utils/request",
-    "@cetc-cli/utils": "file:../../utils/utils",
-    "fs-extra": "^10.1.0",
-    "inquirer": "^8.2.4",
-    "semver": "^7.3.7",
-    "user-home": "^3.0.0"
+    "axios": "^0.27.2"
   }
 }

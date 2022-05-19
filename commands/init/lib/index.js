@@ -1,12 +1,18 @@
 'use strict'; // command命令action方法, 初始化
 
 const fs = require('fs');
+const path = require('path');
 const inquirer = require('inquirer'); // 命令行工具
 const fse = require('fs-extra'); // fs拓展之后的插件， 含promise
 const semver = require('semver'); // 对比版本号
+const userHome = require('user-home'); // 获取用户主目录
 
-const Command = require('@cetc-cli/command');
+const Command = require('@cetc-cli/command'); // command基类
 const log = require('@cetc-cli/log');
+const Package = require('@cetc-cli/package'); // 处理npm包类
+const { spinnerStart, sleep } = require('@cetc-cli/utils'); // 工具库
+
+const getProjectTemplate = require('./getProjectTemplate'); // 获取模板接口
 
 const TYPE_PROJECT = 'project'
 const TYPE_COMPONENT = 'component'
@@ -23,11 +29,12 @@ class InitCommand extends Command {
   async exec () { // init的业务逻辑
     try {
       // 1. 准备阶段
-      const projectInfo = await this.prepare()
+      let projectInfo = await this.prepare()
       if (projectInfo) {
+        this.projectInfo = projectInfo
         log.verbose('projectInfo', projectInfo)
         // 2. 下载模板
-        this.downloadTemplate()
+        await this.downloadTemplate()
         // 3. 安装模板
       }
     } catch (e) {
@@ -36,7 +43,7 @@ class InitCommand extends Command {
   }
 
   // 下载模板
-  downloadTemplate () {
+  async downloadTemplate () {
     /**
      * 1. 通过项目模板api获取项目模板信息
      *  1.1 通过egg.js搭建一套后端系统
@@ -44,10 +51,55 @@ class InitCommand extends Command {
      *  1.3 将项目模板信息存储到mongodb数据库中
      *  1.4 通过egg.js获取mongodb中的数据并且通过api返回
      */
+    // console.log(this.projectInfo, this.template)
+    const { projectTemplate } = this.projectInfo
+    const templateInfo = this.template.find(item => item.npmName === projectTemplate)
+    // console.log(templateInfo, userHome)
+    const targetPath = path.resolve(userHome, '.cetc-cli', 'template')
+    const storePath = path.resolve(userHome, '.cetc-cli', 'template', 'node_modules')
+    const { npmName: packageName, version: packageVersion } = templateInfo
+
+    const templateNpm = new Package({
+      targetPath,
+      storePath,
+      packageName,
+      packageVersion
+    })
+    if (!await templateNpm.exists()) { // npm包是否存在
+      const sps = spinnerStart('正在下载模板...')
+      await sleep()
+      try {
+        await templateNpm.install()
+        log.success('下载模板成功')
+      } catch (e) {
+        throw e
+      } finally {
+        sps.stop(true)
+      }
+    } else {
+      const sps = spinnerStart('正在更新模板...')
+      await sleep()
+      try {
+        await templateNpm.update()
+        log.success('更新模板成功')
+      } catch (e) {
+        throw e
+      } finally {
+        sps.stop(true)
+      }
+    }
   }
 
 
   async prepare () {
+    // 0. 判断项目模板是否存在
+    let template = await getProjectTemplate()
+    // console.log(template)
+    if (!template || template.length < 1) {
+      throw new Error('项目模板不存在！')
+    }
+    this.template = template
+
     const localPath = process.cwd() // path.resolve('.')
 
     // 1. 判断当前目录是否为空
@@ -162,6 +214,12 @@ class InitCommand extends Command {
               return v
             }
           }
+        },
+        {
+          type: 'list',
+          name: 'projectTemplate',
+          message: '请输入项目模板：',
+          choices: this.createTemplateChoice()
         }
       ])
 
@@ -175,6 +233,13 @@ class InitCommand extends Command {
       ...project
     }
     return projectInfo
+  }
+
+  createTemplateChoice () { // 选择创建项目模板
+    return this.template.map(item => ({
+      value: item.npmName,
+      name: item.name
+    }))
   }
 
   // 判断当前目录是否为空
