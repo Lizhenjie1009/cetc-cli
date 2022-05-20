@@ -101,7 +101,7 @@ class Package {
       })
       this.packageVersion = latestPackageVersion
     }
-    console.log(latestFilePath)
+    // console.log(latestFilePath)
     return latestFilePath
   }
   // 获取入口文件的路径

@@ -9,6 +9,7 @@ const cp = require('child_process');
 
 const Package = require('@cetc-cli/package');
 const log = require('@cetc-cli/log');
+const { execOS } = require('@cetc-cli/utils');
 
 
 // 映射package包
@@ -86,7 +87,8 @@ async function exec() {
 
       const code = `require('${rootFile}').call(null, ${JSON.stringify(args)})`;
       // 兼容系统
-      const child = spawn('node', ['-e', code], {
+      // const child = spawn('node', ['-e', code], {
+      const child = execOS('node', ['-e', code], {
         cwd: process.cwd(),
         stdio: 'inherit' // 子进程将所有stream返回给父
       })

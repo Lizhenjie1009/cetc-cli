@@ -28,6 +28,7 @@
   },
   "dependencies": {
     "@cetc-cli/package": "file:../../models/package",
-    "@cetc-cli/log": "file:../../utils/log"
+    "@cetc-cli/log": "file:../../utils/log",
+    "@cetc-cli/utils": "file:../../utils/utils"
   }
 }

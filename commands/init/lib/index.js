@@ -10,12 +10,15 @@ const userHome = require('user-home'); // 获取用户主目录
 const Command = require('@cetc-cli/command'); // command基类
 const log = require('@cetc-cli/log');
 const Package = require('@cetc-cli/package'); // 处理npm包类
-const { spinnerStart, sleep } = require('@cetc-cli/utils'); // 工具库
+const { spinnerStart, sleep, execAsync } = require('@cetc-cli/utils'); // 工具库
 
 const getProjectTemplate = require('./getProjectTemplate'); // 获取模板接口
 
 const TYPE_PROJECT = 'project'
 const TYPE_COMPONENT = 'component'
+const TEMPLATE_TYPE_NORMAL = 'normal'
+const TEMPLATE_TYPE_CUSTOM = 'custom'
+const WHITE_COMMAND = ['npm', 'cnpm']
 
 class InitCommand extends Command {
   init () { // 初始化-获取参数
@@ -36,10 +39,114 @@ class InitCommand extends Command {
         // 2. 下载模板
         await this.downloadTemplate()
         // 3. 安装模板
+        await this.installTemplate()
       }
     } catch (e) {
       log.error(e.message)
     }
+  }
+
+  async installTemplate () {
+    if(this.templateInfo) {
+      if (!this.templateInfo.type) {
+        this.templateInfo.type = TEMPLATE_TYPE_NORMAL
+      }
+
+      if (this.templateInfo.type === TEMPLATE_TYPE_NORMAL) {
+        // 标准安装
+        await this.installNormalTemplate()
+      } else if (this.templateInfo.type === TEMPLATE_TYPE_CUSTOM) {
+        // 自定义安装
+        await this.installCustomTemplate()
+      } else {
+        throw new Error('无法识别项目模板类型！')
+      }
+    } else {
+      throw new Error('项目模板信息不存在！')
+    }
+  }
+
+  // 执行命令
+  async execCommand (commad, msg) {
+    let res = null
+    if (commad) { // 'npm install'
+      const commadArray = commad.split(' ')
+      const cmd = this.checkCommand(commadArray[0])
+      if (!cmd) {
+        throw new Error('命令不存在！', commad)
+      }
+      const args = commadArray.slice(1)
+      res = await execAsync(cmd, args, {
+        stdio: 'inherit',
+        cwd: process.cwd()
+      })
+    }
+    if (res !== 0) {
+      throw new Error(msg)
+    }
+
+    return res
+  }
+
+  // ejsRender (ignore) { // ejs渲染
+  //   return new Promise((resolve, reject) => {
+  //     // 筛选文件的
+  //     require('glob')('**', {
+  //       cwd: process.cwd(),
+  //       ignore,
+  //     })
+  //   })
+  // }
+
+  async installNormalTemplate () {
+    // console.log('安装标准模板')
+    // 拷贝缓存目录模板至当前目录
+    let sps = spinnerStart('正在安装模板...')
+    await sleep()
+    try {
+      // 缓存目录
+      const templatePath = path.resolve(this.templateNpm.cacheFilePath, 'template')
+      // 当前目录
+      const targetPath = process.cwd()
+      fse.ensureDirSync(templatePath) // 确保目录为真
+      fse.ensureDirSync(targetPath) // 确保目录为真
+      fse.copySync(templatePath, targetPath) 
+    } catch (e) {
+      throw e;
+    } finally {
+      sps.stop(true)
+      log.success('安装模板成功')
+    }
+
+    // const ignore = ['node_modules/**']
+    // await this.ejsRender(ignore)
+
+    const { installCommand, startCommand } = this.templateInfo
+    // 依赖安装
+    await this.execCommand(installCommand, '依赖安装过程失败！')
+    // 启动命令执行
+    await this.execCommand(startCommand, '启动项目失败！')
+    // if (startCommand) { // 'npm install'
+    //   const startCmd = startCommand.split(' ')
+    //   const cmd = this.checkCommand(startCmd[0])
+    //   const args = startCmd.slice(1)
+    //   await execAsync(cmd, args, {
+    //     stdio: 'inherit',
+    //     cwd: process.cwd()
+    //   })
+    // }
+  }
+
+  checkCommand (cmd) { // 检查执行命令
+    if (WHITE_COMMAND.includes(cmd)) {
+      return cmd
+    }
+    return null
+  }
+  
+  async installCustomTemplate () {
+    console.log('安装自定义模板')
+
   }
 
   // 下载模板
@@ -58,6 +165,7 @@ class InitCommand extends Command {
     const targetPath = path.resolve(userHome, '.cetc-cli', 'template')
     const storePath = path.resolve(userHome, '.cetc-cli', 'template', 'node_modules')
     const { npmName: packageName, version: packageVersion } = templateInfo
+    this.templateInfo = templateInfo
 
     const templateNpm = new Package({
       targetPath,
@@ -70,22 +178,28 @@ class InitCommand extends Command {
       await sleep()
       try {
         await templateNpm.install()
-        log.success('下载模板成功')
       } catch (e) {
         throw e
       } finally {
         sps.stop(true)
+        if (await templateNpm.exists()) {
+          log.success('下载模板成功')
+          this.templateNpm = templateNpm
+        }
       }
     } else {
       const sps = spinnerStart('正在更新模板...')
       await sleep()
       try {
         await templateNpm.update()
-        log.success('更新模板成功')
       } catch (e) {
         throw e
       } finally {
         sps.stop(true)
+        if (await templateNpm.exists()) {
+          log.success('更新模板成功')
+          this.templateNpm = templateNpm
+        }
       }
     }
   }
@@ -222,16 +336,19 @@ class InitCommand extends Command {
           choices: this.createTemplateChoice()
         }
       ])
-
+      projectInfo = {
+        type,
+        ...project
+      }
     } else if (type === TYPE_COMPONENT) { // 5. 获取组件的基本信息
 
     }
 
-    // return 项目的基本信息（object）
-    projectInfo = {
-      type,
-      ...project
+    if (projectInfo.projectName) {
+      // AbcDef --> abc-def
+      projectInfo.className = require('kebab-case')(projectInfo.projectName).replace(/^-/, ''); // 处理驼峰转-
     }
+    // return 项目的基本信息（object）
     return projectInfo
   }
 
