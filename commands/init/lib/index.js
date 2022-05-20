@@ -6,6 +6,8 @@ const inquirer = require('inquirer'); // 命令行交互工具
 const fse = require('fs-extra'); // fs拓展之后的插件， 含promise
 const semver = require('semver'); // 对比版本号
 const userHome = require('user-home'); // 获取用户主目录
+const glob = require('glob'); // 筛选文件
+const ejs = require('ejs'); // 模板渲染
 
 const Command = require('@cetc-cli/command'); // command基类
 const log = require('@cetc-cli/log');
@@ -38,11 +40,15 @@ class InitCommand extends Command {
         log.verbose('projectInfo', projectInfo)
         // 2. 下载模板
         await this.downloadTemplate()
+        log.verbose('package', this.templateNpm)
         // 3. 安装模板
         await this.installTemplate()
       }
     } catch (e) {
       log.error(e.message)
+      if (process.env.LOG_LEVEL === 'verbose') { // debug环境
+        console.log(e)
+      }
     }
   }
 
@@ -88,15 +94,34 @@ class InitCommand extends Command {
     return res
   }
 
-  // ejsRender (ignore) { // ejs渲染
-  //   return new Promise((resolve, reject) => {
-  //     // 筛选文件的
-  //     require('glob')('**', {
-  //       cwd: process.cwd(),
-  //       ignore,
-  //     })
-  //   })
-  // }
+  ejsRender (options) { // ejs渲染
+    const dir = process.cwd()
+    const projectInfo = this.projectInfo
+    return new Promise((resolve, reject) => {
+      glob('**', {
+        cwd: process.cwd(),
+        ignore: options.ignore || '',
+        nodir: true
+      }, (err, files) => {
+        if (err) reject(err)
+
+        Promise.all(files.map(file => {
+          const filePath = path.join(dir, file)
+          return new Promise((resolve1, reject1) => {
+            // console.log(this.projectInfo)
+            ejs.renderFile(filePath, projectInfo, {}, (err, result) => {
+              // console.log(result)
+              if (err) reject1(err)
+              fse.writeFileSync(filePath, result)
+              resolve1(result)
+            })
+          })
+        }))
+          .then(res => resolve(res))
+          .catch(err => reject(err))
+      })
+    })
+  }
 
   async installNormalTemplate () {
     // console.log('安装标准模板')
@@ -118,14 +143,15 @@ class InitCommand extends Command {
       log.success('安装模板成功')
     }
 
-    // const ignore = ['node_modules/**']
-    // await this.ejsRender(ignore)
+    const templateIgnore = this.templateInfo.ignore || []
+    const ignore = ['**/node_modules/**', ...templateIgnore]
+    await this.ejsRender({ ignore })
 
     const { installCommand, startCommand } = this.templateInfo
     // 依赖安装
-    await this.execCommand(installCommand, '依赖安装过程失败！')
+    await this.execCommand(installCommand, '依赖安装失败！')
     // 启动命令执行
-    await this.execCommand(startCommand, '启动项目失败！')
+    await this.execCommand(startCommand, '启动执行命令失败！')
     // if (startCommand) { // 'npm install'
     //   const startCmd = startCommand.split(' ')
     //   const cmd = this.checkCommand(startCmd[0])
@@ -243,7 +269,10 @@ class InitCommand extends Command {
 
         if (confirmDelete) {
           // 清空当前目录
+          const sps = spinnerStart('正在清空当前目录...')
+          await sleep()
           fse.emptyDirSync(localPath)
+          sps.stop(true)
         }
       }
     }
@@ -253,8 +282,17 @@ class InitCommand extends Command {
   
   // 返回创建信息
   async getProjectInfo () {
+    function isValidName (v) { // 校验name合法
+      return /^[a-zA-Z]+([-|_][a-zA-Z][a-zA-Z0-9]*|[a-zA-Z0-9])*$/.test(v)
+    }
+
     let projectInfo = {}
-    let project = null // 项目信息
+    let isProjectNameValid = false
+
+    if (isValidName(this.projectName)) {
+      isProjectNameValid = true
+      projectInfo.projectName = this.projectName
+    }
 
     // 3. 选择创建项目或者文件
     const { type } = await inquirer.prompt({
@@ -271,82 +309,123 @@ class InitCommand extends Command {
         value: TYPE_COMPONENT
       }]
     })
-    
-    if (type === TYPE_PROJECT) { // 4. 获取项目的基本信息
-      project = await inquirer.prompt([
-        {
-          type: 'input',
-          name: 'projectName',
-          message: '请输入项目的名称：',
-          default: 'cetc-pro',
-          validate: function (v) {
-            /**
-             * 1. 输入的首字符必须为英文字符
-             * 2. 尾字符必须为英文或数字，不能为字符
-             * 3. 字符仅允许'-_'
-             * a-b a_b aaa bbb aa123
-             */
-            // return /^[a-zA-Z]+([-|_][a-zA-Z][a-zA-Z0-9]*|[a-zA-Z0-9])*$/.test(v)
 
-            const done = this.async();
-            // Do async stuff
-            setTimeout(function() {
-              if (!/^[a-zA-Z]+([-|_][a-zA-Z][a-zA-Z0-9]*|[a-zA-Z0-9])*$/.test(v)) {
-                // Pass the return value in the done callback
-                done('请输入合法的项目名称！');
-                return;
-              }
-              // Pass the return value in the done callback
-              done(null, true);
-            }, 0);
-          },
-          filter: function (v) {
-            return v
-          }
-        },
-        {
-          type: 'input',
-          name: 'projectVersion',
-          message: '请输入项目的版本号：',
-          default: '1.0.0',
-          validate: function (v) {
-            // return !!semver.valid(v) // 转成boolean
+    const title = type === TYPE_PROJECT ? '项目' : '组件'
 
-            const done = this.async();
-            setTimeout(function() {
-              if (!(!!semver.valid(v))) {
-                done('请输入合法的项目版本号！');
-                return;
-              }
-              done(null, true);
-            }, 0);
-          },
-          filter: function (v) {
-            if (!!semver.valid(v)) {
-              return semver.valid(v)
-            } else {
-              return v
-            }
+    // 过滤组件或者项目
+    this.template = this.template.filter(template => template.tag.includes(type))
+
+    const projectNamePrompt = {
+      type: 'input',
+      name: 'projectName',
+      message: `请输入${title}的名称：`,
+      default: 'cetc-pro',
+      validate: function (v) {
+        /**
+         * 1. 输入的首字符必须为英文字符
+         * 2. 尾字符必须为英文或数字，不能为字符
+         * 3. 字符仅允许'-_'
+         * a-b a_b aaa bbb aa123
+         */
+        // return /^[a-zA-Z]+([-|_][a-zA-Z][a-zA-Z0-9]*|[a-zA-Z0-9])*$/.test(v)
+
+        const done = this.async();
+        // Do async stuff
+        setTimeout(function() {
+          if (!isValidName(v)) {
+            // Pass the return value in the done callback
+            done(`请输入合法的项目名称！`);
+            return;
           }
-        },
-        {
-          type: 'list',
-          name: 'projectTemplate',
-          message: '请输入项目模板：',
-          choices: this.createTemplateChoice()
+          // Pass the return value in the done callback
+          done(null, true);
+        }, 0);
+      },
+      filter: function (v) {
+        return v
+      }
+    }
+    const projectPrompt = []
+    if (!isProjectNameValid) {
+      projectPrompt.push(projectNamePrompt)
+    }
+    projectPrompt.push({
+      type: 'input',
+      name: 'projectVersion',
+      message: `请输入${title}的版本号：`,
+      default: '1.0.0',
+      validate: function (v) {
+        // return !!semver.valid(v) // 转成boolean
+        const done = this.async();
+        setTimeout(function() {
+          if (!(!!semver.valid(v))) {
+            done(`请输入合法的${title}版本号！`);
+            return;
+          }
+          done(null, true);
+        }, 0);
+      },
+      filter: function (v) {
+        if (!!semver.valid(v)) {
+          return semver.valid(v)
+        } else {
+          return v
         }
-      ])
+      }
+    },
+    {
+      type: 'list',
+      name: 'projectTemplate',
+      message: `请输入${title}模板：`,
+      choices: this.createTemplateChoice()
+    })
+
+    if (type === TYPE_PROJECT) { // 4. 获取项目的基本信息
+      const project = await inquirer.prompt(projectPrompt)
       projectInfo = {
+        ...projectInfo,
         type,
         ...project
       }
     } else if (type === TYPE_COMPONENT) { // 5. 获取组件的基本信息
+      const descriptionPrompt = {
+        type: 'input',
+        name: 'componentDescription',
+        message: '请输入组件描述信息：',
+        default: '',
+        validate: function (v) {
+          // return !!semver.valid(v) // 转成boolean
+          const done = this.async();
+          setTimeout(function() {
+            if (!v) {
+              done('请输入组件描述信息！');
+              return;
+            }
+            done(null, true);
+          }, 0);
+        }
+      }
 
+      projectPrompt.push(descriptionPrompt)
+
+      const component = await inquirer.prompt(projectPrompt)
+      projectInfo = {
+        ...projectInfo,
+        type,
+        ...component
+      }
     }
 
     if (projectInfo.projectName) {
+      projectInfo.name = projectInfo.projectName
       // AbcDef --> abc-def
       projectInfo.className = require('kebab-case')(projectInfo.projectName).replace(/^-/, ''); // 处理驼峰转-
+    }
+    if (projectInfo.projectVersion) {
+      projectInfo.version = projectInfo.projectVersion
+    }
+    if (projectInfo.componentDescription) {
+      projectInfo.description = projectInfo.componentDescription
     }
     // return 项目的基本信息（object）
     return projectInfo
