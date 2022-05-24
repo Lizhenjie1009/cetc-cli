@@ -1,6 +1,6 @@
 {
   "name": "@cetc-cli/init",
-  "version": "1.1.4",
+  "version": "1.1.5",
   "description": "cetc-cli init",
   "author": "DESKTOP-KS8B59U\\Administrator <lizhenjie979@163.com>",
   "homepage": "https://github.com/Lizhenjie1009/cetc-cli#readme",
@@ -27,11 +27,11 @@
     "url": "https://github.com/Lizhenjie1009/cetc-cli/issues"
   },
   "dependencies": {
-    "@cetc-cli/command": "^1.1.4",
+    "@cetc-cli/command": "^1.1.5",
     "@cetc-cli/log": "file:../../utils/log",
-    "@cetc-cli/package": "^1.1.4",
+    "@cetc-cli/package": "^1.1.5",
     "@cetc-cli/request": "file:../../utils/request",
-    "@cetc-cli/utils": "^1.1.4",
+    "@cetc-cli/utils": "^1.1.5",
     "ejs": "^3.1.8",
     "fs-extra": "^10.1.0",
     "glob": "^8.0.3",
