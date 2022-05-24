@@ -1,4 +1,5 @@
 'use strict'; // 执行命令方法, 初始化引包
+
 /**
  * cetc-cli init test // 没指定目录，从npm下载指导package
  * cetc-cli init test -tp E:\Desktop\cli\cetc-cli\commands\init // 指定目录，走目录逻辑

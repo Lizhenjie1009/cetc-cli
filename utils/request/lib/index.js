@@ -1,5 +1,4 @@
-'use strict';
-// 请求配置
+'use strict'; // 请求配置
 
 const axios = require('axios');
 

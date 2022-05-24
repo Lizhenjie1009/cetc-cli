@@ -1,5 +1,4 @@
 'use strict';
-
 // 1. CLI_TARGET_PATH -> modulePath
 // 2. modulePath -> Package(npm模块)
 // 3. Package.getRootFile(获取入口文件)

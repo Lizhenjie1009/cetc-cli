@@ -1,5 +1,4 @@
 'use strict';
-
 const semver = require('semver'); // 对比版本号
 const colors = require('colors/safe');
 
