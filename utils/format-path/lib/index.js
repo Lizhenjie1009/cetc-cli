@@ -1,5 +1,4 @@
 'use strict';
-
 // 文件路径兼容mac、win
 
 const path = require('path');

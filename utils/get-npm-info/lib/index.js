@@ -1,5 +1,4 @@
 'use strict';
-
 const axios = require('axios');
 const urlJoin = require('url-join'); // 拼接合法url
 const semver = require('semver'); // 对比版本号

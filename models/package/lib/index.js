@@ -15,7 +15,6 @@ const { isObject } = require('@cetc-cli/utils');
 const formatPath = require('@cetc-cli/format-path');
 const { getDefaultRegistry, getNpmLatestVersion } = require('@cetc-cli/get-npm-info');
 
-
 class Package {
   constructor (options) {
     if (!options || !isObject(options)) {

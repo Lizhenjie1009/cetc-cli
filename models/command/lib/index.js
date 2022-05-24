@@ -7,7 +7,6 @@ const log = require('@cetc-cli/log');
 
 const LOWEST_NODE_VERSION = '12.0.0'
 
-
 class Command {
   constructor (argv) {
     // log.verbose('Command constructor', argv)

@@ -23,7 +23,6 @@ const TEMPLATE_TYPE_NORMAL = 'normal'
 const TEMPLATE_TYPE_CUSTOM = 'custom'
 const WHITE_COMMAND = ['npm', 'cnpm']
 
-
 class InitCommand extends Command {
   init () { // 初始化-获取参数
     this.projectName = this._argv[0] || ''
