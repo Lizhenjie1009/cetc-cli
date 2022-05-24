@@ -1,6 +1,5 @@
-// 封装npmlog
 'use strict';
-
+// 封装npmlog
 const log = require('npmlog')
 
 // log.level = 'verbose'

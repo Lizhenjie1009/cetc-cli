@@ -11,7 +11,6 @@ const Package = require('@cetc-cli/package');
 const log = require('@cetc-cli/log');
 const { execOS } = require('@cetc-cli/utils');
 
-
 // 映射package包
 const SETTINGS = {
   init: '@cetc-cli/init' // --修改 '@cetc-cli/init'

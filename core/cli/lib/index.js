@@ -9,7 +9,6 @@ const userHome = require('user-home'); // 判断用户主目录
 const pathExists = require('path-exists').sync; // 判断文件是否存在
 const commander = require('commander'); // 命令行工具
 
-
 const log = require('@cetc-cli/log');
 const { getNpmSemverVersion } = require('@cetc-cli/get-npm-info');
 // const init = require('@cetc-cli/init');

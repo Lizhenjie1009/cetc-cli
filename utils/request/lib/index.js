@@ -1,5 +1,6 @@
 'use strict';
 // 请求配置
+
 const axios = require('axios');
 
 const BASE_URL = process.env.BASE_URL ? process.env.BASE_URL : 'http://cetc-cli:7001'
