@@ -30,5 +30,6 @@
     "@cetc-cli/log": "file:../../utils/log",
     "colors": "^1.4.0",
     "semver": "^7.3.7"
-  }
+  },
+  "gitHead": "5857cbdaaf9366e4c09f0846dede2b6184af5d98"
 }

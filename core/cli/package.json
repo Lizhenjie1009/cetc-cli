@@ -23,9 +23,9 @@
     "test": "echo \"Error: run tests from root\" && exit 1"
   },
   "dependencies": {
-    "@cetc-cli/exec": "file:../exec",
+    "@cetc-cli/exec": "^1.1.1",
     "@cetc-cli/get-npm-info": "file:../../utils/get-npm-info",
-    "@cetc-cli/init": "file:../../commands/init",
+    "@cetc-cli/init": "^1.1.1",
     "@cetc-cli/log": "file:../../utils/log",
     "colors": "^1.4.0",
     "commander": "^8.3.0",
@@ -36,5 +36,6 @@
     "root-check": "^1.0.0",
     "semver": "^7.3.7",
     "user-home": "^3.0.0"
-  }
+  },
+  "gitHead": "5857cbdaaf9366e4c09f0846dede2b6184af5d98"
 }
