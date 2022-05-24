@@ -14,7 +14,7 @@ const log = require('@cetc-cli/log');
 const Package = require('@cetc-cli/package'); // 处理npm包类
 const { spinnerStart, sleep, execAsync } = require('@cetc-cli/utils'); // 工具库
 
-const getProjectTemplate = require('./getProjectTemplate'); // 获取模板接口
+const getProjectTemplate = require('./getProjectTemplate'); // 1-获取模板接口
 
 const TYPE_PROJECT = 'project'
 const TYPE_COMPONENT = 'component'
@@ -170,17 +170,18 @@ class InitCommand extends Command {
     return null
   }
   
-  async installCustomTemplate () {
-    console.log('安装自定义模板', this.templateNpm)
+  async installCustomTemplate () { // 安装自定义模板
     if (await this.templateNpm.exists()) {
       const rootFile = this.templateNpm.getRootFilePath()
       if (fs.existsSync(rootFile)) {
         log.notice('开始执行自定义模板')
-        const options = {
-          ...this.templateInfo,
-          cwd: process.cwd()
-        }
         const templatePath = path.resolve(this.templateNpm.cacheFilePath, 'template')
+        const options = {
+          templateInfo: this.templateInfo,
+          projectInfo: this.projectInfo,
+          sourcePath: templatePath,
+          targetPath: process.cwd()
+        }
         const code = `require('${rootFile}')(${JSON.stringify(options)})`
         log.verbose('code', code)
         await execAsync('node', ['-e', code], {
