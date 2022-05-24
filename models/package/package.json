@@ -1,6 +1,6 @@
 {
   "name": "@cetc-cli/package",
-  "version": "1.1.3",
+  "version": "1.1.4",
   "description": "cetc-cli npm package",
   "author": "DESKTOP-KS8B59U\\Administrator <lizhenjie979@163.com>",
   "homepage": "https://github.com/Lizhenjie1009/cetc-cli#readme",
@@ -27,9 +27,9 @@
     "url": "https://github.com/Lizhenjie1009/cetc-cli/issues"
   },
   "dependencies": {
-    "@cetc-cli/format-path": "^1.1.3",
+    "@cetc-cli/format-path": "^1.1.4",
     "@cetc-cli/get-npm-info": "file:../../utils/get-npm-info",
-    "@cetc-cli/utils": "^1.1.3",
+    "@cetc-cli/utils": "^1.1.4",
     "fs-extra": "^10.1.0",
     "npminstall": "^6.1.0",
     "path-exists": "^4.0.0",
