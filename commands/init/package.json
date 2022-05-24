@@ -29,7 +29,7 @@
   "dependencies": {
     "@cetc-cli/command": "^1.1.5",
     "@cetc-cli/log": "file:../../utils/log",
-    "@cetc-cli/package": "^1.1.5",
+    "@cetc-cli/package": "^1.1.6",
     "@cetc-cli/request": "file:../../utils/request",
     "@cetc-cli/utils": "^1.1.5",
     "ejs": "^3.1.8",
