@@ -14,7 +14,7 @@ const { execOS } = require('@cetc-cli/utils');
 
 // 映射package包
 const SETTINGS = {
-  init: '@imooc-cli/init' // --修改 '@cetc-cli/init'
+  init: '@cetc-cli/init' // --修改 '@cetc-cli/init'
 }
 
 // 缓存目录
