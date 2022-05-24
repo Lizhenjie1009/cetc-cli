@@ -15,6 +15,7 @@ const Package = require('@cetc-cli/package'); // 处理npm包类
 const { spinnerStart, sleep, execAsync } = require('@cetc-cli/utils'); // 工具库
 
 const getProjectTemplate = require('./getProjectTemplate'); // 1-获取模板接口
+const data = require('./templateData.json'); // 2-获取本地维护的模板数据
 
 const TYPE_PROJECT = 'project'
 const TYPE_COMPONENT = 'component'
@@ -251,8 +252,10 @@ class InitCommand extends Command {
 
   async prepare () {
     // 0. 判断项目模板是否存在
-    let template = await getProjectTemplate()
+    // let template = await getProjectTemplate()
+    let template = data
     // console.log(template)
+    // console.log(data)
     if (!template || template.length < 1) {
       throw new Error('项目模板不存在！')
     }
